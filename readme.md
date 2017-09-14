@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/thearn/SGNDI.svg)](https://travis-ci.org/thearn/SGNDI)
+
 Separable Grid N-Dimensional Interpolator (SGDNI)
 -------------------------------------------------
 
