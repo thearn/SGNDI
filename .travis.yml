@@ -22,6 +22,8 @@ install:
   - conda info -a
   # install deps
   - conda install numpy scipy nose
+  # install this repo as a package
+  - pip install -e .
 
 script:
   # run unit test suite
