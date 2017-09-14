@@ -1,7 +1,7 @@
 from numpy.testing import run_module_suite, assert_allclose
 import numpy as np
 from scipy.interpolate import Akima1DInterpolator, CubicSpline
-from sgdni import SeparableGridNDInterpolator
+from sgndi import SeparableGridNDInterpolator
 
 class TestSGNDIbase(object):
 
