@@ -25,7 +25,7 @@ The shortest example might be fitting the XOR function:
 
 ```python
 import numpy as np
-from sgdni import SeparableGridNDInterpolator
+from sgndi import SeparableGridNDInterpolator
 
 a = np.array([0, 1])
 b = np.array([0, 1])
@@ -49,7 +49,7 @@ A more ambitious 4D paraboloid example, using `np.meshgrid` to create the struct
 
 ```python
 import numpy as np
-from sgdni import SeparableGridNDInterpolator
+from sgndi import SeparableGridNDInterpolator
 
 # Let's define a 4D function to test with:
 
@@ -109,7 +109,7 @@ A 2D example can show the performance visually. A very course sampling is used t
 
 ```python
 import numpy as np
-from sgdni import SeparableGridNDInterpolator
+from sgndi import SeparableGridNDInterpolator
 from scipy.interpolate import UnivariateSpline
 import matplotlib.pyplot as plt
 
@@ -174,3 +174,11 @@ quit()
 ```
 
 Which gives the plot shown at the top of this readme.
+
+Limitations
+------------
+- The interpolation can only be called one evaluation point at a time. I am working
+on vectorizing this to allow for a collection of points to be interpolated at once.
+- Only first-order derivatives (gradients) are computed.
+
+

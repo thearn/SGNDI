@@ -129,6 +129,7 @@ class SeparableGridNDInterpolator(object):
         if nu > 1:
             msg = "Only first derivatives (nu=1) are currently supported"
             raise TypeError(msg)
+            
         gradient = []
         axis_derivs = []
         values = self.values.copy()
