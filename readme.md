@@ -12,7 +12,9 @@ interface to the interpolators provided by [`scipy.interpolate`](https://docs.sc
 This class provides interpolation on a regular grid in arbitrary dimensions, by applying
 a selected 1D interpolation class on each grid axis sequentially. These
 1D interpolation classes are the ones provided by [`scipy.interpolate`](https://docs.scipy.org/doc/scipy/reference/interpolate.html), such
-as [`CubicSpline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html#scipy.interpolate.CubicSpline), [`UnivariateSpline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.UnivariateSpline.html#scipy.interpolate.UnivariateSpline), or [`Akima1DInterpolator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.Akima1DInterpolator.html#scipy.interpolate.Akima1DInterpolator).
+as [`CubicSpline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html#scipy.interpolate.CubicSpline), [`UnivariateSpline`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.UnivariateSpline.html#scipy.interpolate.UnivariateSpline), or [`Akima1DInterpolator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.Akima1DInterpolator.html#scipy.interpolate.Akima1DInterpolator). By default, `CubicSpline` is used if no interpolator is specified.
+
+This method can be considered a generalization of the class of multidimensional interpolators that operate on each dimension sequentially, such as [bilinear](https://en.wikipedia.org/wiki/Bilinear_interpolation), [bicubic](https://en.wikipedia.org/wiki/Bicubic_interpolation), [trilinear](https://en.wikipedia.org/wiki/Trilinear_interpolation), [tricubic](https://en.wikipedia.org/wiki/Tricubic_interpolation), etc. In other words, is provides n-linear, n-cubic, etc. interpolation capabilities within a single class.
 
 If derivatives are provided by the chosen 1D interpolation method, then
 a gradient vector of the multidimensional interpolation may be computed
