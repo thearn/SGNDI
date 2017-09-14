@@ -5,4 +5,5 @@ setup(name='sgndi',
       packages=[
           'sgndi',
       ],
+      install_requires=['scipy>=0.18']
 )
