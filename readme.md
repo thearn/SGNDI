@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/thearn/SGNDI.svg)](https://travis-ci.org/thearn/SGNDI)
+[![Build Status](https://travis-ci.org/thearn/SGNDI.svg?branch=master)](https://travis-ci.org/thearn/SGNDI)
+[![Coverage Status](https://coveralls.io/repos/github/thearn/SGNDI/badge.svg?branch=master)](https://coveralls.io/github/thearn/SGNDI?branch=master)
 
 Separable Grid N-Dimensional Interpolator (SGDNI)
 -------------------------------------------------
@@ -18,7 +19,7 @@ This method can be considered a generalization of the class of multidimensional 
 
 If derivatives are provided by the chosen 1D interpolation method, then
 a gradient vector of the multidimensional interpolation may be computed
-and returned when the interpolation is performed. At the moment, only
+and and cached when the interpolation is performed. This can then be accessed by the `derivative` method. At the moment, only
 first-order derivatives are supported.
 
 Examples
