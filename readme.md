@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/thearn/SGNDI.svg)](https://travis-ci.org/thearn/SGNDI)
+[![Coverage Status](https://coveralls.io/repos/github/thearn/SGNDI/badge.svg?branch=master)](https://coveralls.io/github/thearn/SGNDI?branch=master)
 
 Separable Grid N-Dimensional Interpolator (SGDNI)
 -------------------------------------------------
