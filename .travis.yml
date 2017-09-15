@@ -22,9 +22,14 @@ install:
   - conda info -a
   # install deps
   - conda install numpy scipy nose
+  - pip install coverage
+  - pip install coveralls
   # install this repo as a package
   - pip install -e .
 
 script:
   # run unit test suite
-  - nosetests .
+  - nosetests --with-coverage --cover-package=sgndi .
+  
+after_success:
+  coveralls
