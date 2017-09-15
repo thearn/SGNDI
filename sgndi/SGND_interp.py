@@ -1,10 +1,12 @@
+"""Separable Grid ND Interpolation module."""
 import numpy as np
 
 from scipy.interpolate import CubicSpline
 
 
 class SeparableGridNDInterpolator(object):
-    """
+    """Separable Grid ND Interpolation.
+
     Provides interpolation on a regular grid in arbitrary dimensions, by
     applying a selected 1D interpolation class on each grid axis sequentially.
 
@@ -95,7 +97,7 @@ class SeparableGridNDInterpolator(object):
 
     def __init__(self, points, values, interpolator=CubicSpline,
                  interp_args=(), interp_kwargs={}):
-
+        """Constructor for SeparableGridNDInterpolator."""
         if not hasattr(values, 'ndim'):
             # allow reasonable duck-typed values
             values = np.asarray(values)
@@ -124,8 +126,9 @@ class SeparableGridNDInterpolator(object):
         self._gradient = None
 
     def __call__(self, x, nu=1):
-        """
-        Evaluate the interpolation at given positions. If mu=1, the gradient is
+        """Evaluate the interpolation at given positions.
+
+        If mu=1, the gradient is
         computed together with the interpolation, but is cached and returned
         by the derivative method.
 
@@ -144,7 +147,6 @@ class SeparableGridNDInterpolator(object):
         y : float
             Interpolated output value.
         """
-
         if nu > 0 and 'derivative' not in dir(self.interpolator):
             msg = "Selected 1D Interpolant class must support derivative" +\
                 " computations if derivative order nu > 0"
@@ -203,8 +205,8 @@ class SeparableGridNDInterpolator(object):
         return y
 
     def derivative(self, pt):
-        """
-        Returns the computed gradients at the specified point.
+        """Return the computed gradients at the specified point.
+
         The gradients are computed with the interpolation is performed, but
         are cached and returned separately by this method.
 
