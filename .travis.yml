@@ -21,7 +21,7 @@ install:
   - conda update -q conda
   - conda info -a
   # install deps
-  - conda install numpy scipy nose
+  - conda install numpy scipy pytest pytest-cov
   - pip install coverage
   - pip install coveralls
   # install this repo as a package
@@ -29,7 +29,7 @@ install:
 
 script:
   # run unit test suite
-  - nosetests --with-coverage --cover-package=sgndi .
+  - py.test --cov=sgndi .
   
 after_success:
   coveralls

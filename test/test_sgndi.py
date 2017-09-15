@@ -1,8 +1,9 @@
-from nose.tools import raises
-
 import numpy as np
 
 from numpy.testing import assert_allclose, run_module_suite
+
+from pytest import main
+from pytest import raises as assert_raises
 
 from scipy.interpolate import (Akima1DInterpolator,
                                BarycentricInterpolator,
@@ -48,11 +49,11 @@ class TestSGNDIoutput(object):
             samples[:, i] = np.random.uniform(pt[1], pt[-2], self.m)
 
         for x in samples:
-            yield self.check_output_and_cached_gradient, x
+            self.check_output_and_cached_gradient(x)
 
         y = samples[0]
         for x in samples[1:2]:
-            yield self.check_recomputed_gradient, x, y
+            self.check_recomputed_gradient(x, y)
 
 
 class TestSGNDIparabola(TestSGNDIoutput):
@@ -117,22 +118,21 @@ class TestLinearInterp(TestSGNDIoutput):
 
 class TestSGDNIMiscBehavior(object):
 
-    @raises(ValueError)
     def test_dim_mismatch1(self):
         a = np.array([0, 1, 6])
         b = np.array([0, 1, 2])
         c = [[0, 1], [1, 0], [5, 4]]
-        SeparableGridNDInterpolator([a, b], c)
+        with assert_raises(ValueError):
+            SeparableGridNDInterpolator([a, b], c)
 
-    @raises(ValueError)
     def test_dim_mismatch2(self):
         a = np.array([0, 1, 6])
         b = np.array([0, 1, 2])
         c = np.array([0, 1, 2])
         d = np.array([[0, 1], [1, 0]])
-        SeparableGridNDInterpolator([a, b, c], d)
+        with assert_raises(ValueError):
+            SeparableGridNDInterpolator([a, b, c], d)
 
-    @raises(ValueError)
     def test_max_deriv_order(self):
         np.random.seed(0)
 
@@ -142,9 +142,9 @@ class TestSGDNIMiscBehavior(object):
         A, B = np.meshgrid(a, b, indexing='ij')
         c = A + B**2
         cs = SeparableGridNDInterpolator([a, b], c)
-        cs([2, 4], 2)
+        with assert_raises(ValueError):
+            cs([2, 4], 2)
 
-    @raises(ValueError)
     def test_deriv_available(self):
         np.random.seed(2)
         a = np.random.uniform(-1, 4, 10)
@@ -154,7 +154,8 @@ class TestSGDNIMiscBehavior(object):
         c = np.sin(A - B)
         cs = SeparableGridNDInterpolator([a, b], c,
                                          interpolator=BarycentricInterpolator)
-        cs([2, 4])
+        with assert_raises(ValueError):
+            cs([2, 4])
 
 if __name__ == '__main__':
-    run_module_suite()
+    main()
