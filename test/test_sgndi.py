@@ -25,8 +25,8 @@ class TestSGNDIoutput(object):
         f = interp(x)
         dfdx = interp.derivative(x)
 
-        assert_allclose(self.F(*x), f, rtol=self.tol)
-        assert_allclose(self.dF(*x), dfdx, rtol=self.tol)
+        assert_allclose(self.f(*x), f, rtol=self.tol)
+        assert_allclose(self.df(*x), dfdx, rtol=self.tol)
 
     def check_recomputed_gradient(self, x, y):
         interp = SeparableGridNDInterpolator(self.points, self.values,
@@ -34,7 +34,7 @@ class TestSGNDIoutput(object):
                                              interp_kwargs=self.interp_kwargs)
         interp.derivative(y)
         dfdx = interp.derivative(x)
-        assert_allclose(self.dF(*x), dfdx, rtol=self.tol)
+        assert_allclose(self.df(*x), dfdx, rtol=self.tol)
 
     def test_values(self):
         if not hasattr(self, 'setup'):
@@ -58,20 +58,20 @@ class TestSGNDIoutput(object):
 class TestSGNDIparabola(TestSGNDIoutput):
     m = 4
 
-    def F(self, u, v, z, w):
+    def f(self, u, v, z, w):
         return (u - 5)**2 + (v - 2)**2 + (z - 5)**2 + (w - 0.5)**2
 
-    def dF(self, u, v, z, w):
+    def df(self, u, v, z, w):
         return 2 * (u - 5), 2 * (v - 2), 2 * (z - 5), 2 * (w - 0.5)
 
     def setup(self):
-        U = np.linspace(0, 10, 10)
-        V = np.linspace(0, 4, 6)
-        Z = np.linspace(0, 10, 7)
-        W = np.linspace(0, 1, 8)
-        self.points = [U, V, Z, W]
+        ux = np.linspace(0, 10, 10)
+        vx = np.linspace(0, 4, 6)
+        zx = np.linspace(0, 10, 7)
+        wx = np.linspace(0, 1, 8)
+        self.points = [ux, vx, zx, wx]
         u, v, z, w = np.meshgrid(*self.points, indexing='ij')
-        self.values = self.F(u, v, z, w)
+        self.values = self.f(u, v, z, w)
 
 
 class TestSGNDItrig(TestSGNDIoutput):
@@ -79,19 +79,19 @@ class TestSGNDItrig(TestSGNDIoutput):
     m = 6
     interpolator = Akima1DInterpolator
 
-    def F(self, u, v):
+    def f(self, u, v):
         return u * np.cos(u * v) + v * np.sin(u * v)
 
-    def dF(self, u, v):
+    def df(self, u, v):
         return (-u * v * np.sin(u * v) + v**2 * np.cos(u * v) + np.cos(u * v),
                 -u**2 * np.sin(u * v) + u * v * np.cos(u * v) + np.sin(u * v))
 
     def setup(self):
-        U = np.linspace(0, 2, 50)
-        V = np.linspace(0, 2, 50)
-        self.points = [U, V]
+        ux = np.linspace(0, 2, 50)
+        vx = np.linspace(0, 2, 50)
+        self.points = [ux, vx]
         u, v = np.meshgrid(*self.points, indexing='ij')
-        self.values = self.F(u, v)
+        self.values = self.f(u, v)
 
 
 class TestLinearInterp(TestSGNDIoutput):
@@ -100,19 +100,19 @@ class TestLinearInterp(TestSGNDIoutput):
     m = 5
     interp_kwargs = {'k': 1}
 
-    def F(self, x, y, z):
+    def f(self, x, y, z):
         return 2 * x - y + z
 
-    def dF(self, x, y, z):
+    def df(self, x, y, z):
         return 2, -1, 1
 
     def setup(self):
-        X = np.linspace(-1, 2, 50)
-        Y = np.linspace(-10, 0, 10)
-        Z = np.linspace(3, 9, 20)
-        self.points = [X, Y, Z]
+        xx = np.linspace(-1, 2, 50)
+        yx = np.linspace(-10, 0, 10)
+        zx = np.linspace(3, 9, 20)
+        self.points = [xx, yx, zx]
         x, y, z = np.meshgrid(*self.points, indexing='ij')
-        self.values = self.F(x, y, z)
+        self.values = self.f(x, y, z)
 
 
 class TestSGDNIMiscBehavior(object):
