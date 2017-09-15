@@ -1,10 +1,12 @@
 import numpy as np
+
 from scipy.interpolate import CubicSpline
+
 
 class SeparableGridNDInterpolator(object):
     """
-    Provides interpolation on a regular grid in arbitrary dimensions, by applying
-    a selected 1D interpolation class on each grid axis sequentially. 
+    Provides interpolation on a regular grid in arbitrary dimensions, by
+    applying a selected 1D interpolation class on each grid axis sequentially.
 
     If derivatives are provided by the chosen 1D interpolation method, then
     a gradient vector of the multidimensional interpolation may be computed
@@ -19,19 +21,18 @@ class SeparableGridNDInterpolator(object):
     values : array_like, shape (m1, ..., mn, ...)
         The data on the regular grid in n dimensions.
 
-    interpolator : A 1D interpolation class such as CubicSpline, UnivariateSpline, or 
-        Akima1DInterpolator. Defaults to CubicSpline.
+    interpolator : A 1D interpolation class such as CubicSpline,
+        UnivariateSpline, or Akima1DInterpolator. Defaults to CubicSpline.
 
-    interp_args : An optional tuple of positional arguments to pass to the 
+    interp_args : An optional tuple of positional arguments to pass to the
         interpolator class when called
 
-    interp_kwargs : An optional dictionary of keyword arguments to pass to the 
+    interp_kwargs : An optional dictionary of keyword arguments to pass to the
         interpolator class when called
 
     Methods
     -------
     __call__
-    derivative
 
     See Also
     --------
@@ -41,27 +42,27 @@ class SeparableGridNDInterpolator(object):
 
     Examples
     --------
-    
+
     Let's define a function and its gradient:
 
     >>> def F(u,v,z,w):
     ...    return (u-5)**2 + (v-2)**2 + (z-5)**2 + (w-0.5)**2
     >>> def dF(u,v,z,w):
     ...    return 2*(u-5), 2*(v-2), 2*(z-5), 2*(w-0.5)
-    
+
     Now create 1D arrays for each of the function parameters for sampling.
     These are fairly course.
 
     >>> U = np.linspace(0, 10, 10)
     >>> V = np.linspace(0, 4, 6)
-    >>> Z = np.linspace(0, 10, 7) 
+    >>> Z = np.linspace(0, 10, 7)
     >>> W = np.linspace(0, 1, 8)
     >>> points = [U, V, Z, W]
-    
+
     Create coordinate meshes
 
     >>> u, v, z, w = np.meshgrid(*points, indexing='ij')
-    
+
     Now create the 4D value array
 
     >>> values = F(u, v, z, w)
@@ -69,11 +70,11 @@ class SeparableGridNDInterpolator(object):
     Define a random point to interpolate at
 
     >>> x = [5.26434, 2.121235, 2.7352, 0.5213345]
-    
+
     Create the interpolation class instance
 
     >>> interp = SeparableGridNDInterpolator(points, values)
-    
+
     Call the interpolation at the point above, which by default also
     computes the gradient of the interpolant at this point
 
@@ -84,14 +85,22 @@ class SeparableGridNDInterpolator(object):
     >>> print("computed gradient:", dfdx)
     actual value 5.21434776171525
     computed value 5.214347761715252
-    actual gradient: (0.5286799999999996, 0.24246999999999996, -4.5296, 0.04266900000000007)
+    actual gradient: (0.5286799999999996, 0.24246999999999996, -4.5296,
+    0.04266900000000007)
     computed gradient: [ 0.52868   0.24247  -4.5296    0.042669]
 
     """
 
-    def __init__(self, points, values, interpolator = CubicSpline, 
-                 interp_args = (), interp_kwargs={}):
-        
+    def __init__(self, points, values, interpolator=CubicSpline,
+                 interp_args=(), interp_kwargs={}):
+
+        dim_valid = [len(points[i]) == values.shape[i]
+                     for i in range(len(points))]
+        if not np.all(dim_valid):
+            msg = "Dimension mismatch between the points" +\
+                  " and the data values arrays"
+            raise ValueError(msg)
+
         self.points = points
         self.values = values
         self.interpolator = interpolator
@@ -113,9 +122,8 @@ class SeparableGridNDInterpolator(object):
 
         Returns
         -------
-        y : array_like
-            Interpolated values. Shape is determined by replacing
-            the interpolation axis in the original array with the shape of x.
+        y : float
+            Interpolated value.
 
         gradient : array_like
             if nu = 1, the gradient vector of the interpolated values with r
@@ -124,12 +132,13 @@ class SeparableGridNDInterpolator(object):
 
         if nu > 0 and 'derivative' not in dir(self.interpolator):
             msg = "Selected 1D Interpolant class must support derivative" +\
-                   " computations if derivative order nu > 0"
-            raise TypeError(msg)
+                " computations if derivative order nu > 0"
+            raise ValueError(msg)
+
         if nu > 1:
             msg = "Only first derivatives (nu=1) are currently supported"
-            raise TypeError(msg)
-            
+            raise ValueError(msg)
+
         gradient = []
         axis_derivs = []
         values = self.values.copy()
@@ -138,12 +147,12 @@ class SeparableGridNDInterpolator(object):
             values_reduced = np.zeros(values.size // values.shape[-1])
             newshape = values.shape[: -1]
             local_derivs = []
-            values = values.reshape(values.size // values.shape[-1], 
+            values = values.reshape(values.size // values.shape[-1],
                                     values.shape[-1])
             for k, row in enumerate(values):
-                local_interp = self.interpolator(self.points[i], 
-                                                 row, 
-                                                 *self.interp_args, 
+                local_interp = self.interpolator(self.points[i],
+                                                 row,
+                                                 *self.interp_args,
                                                  **self.interp_kwargs)
                 values_reduced[k] = local_interp(x[i])
                 if nu > 0:
@@ -153,24 +162,24 @@ class SeparableGridNDInterpolator(object):
                 local_derivs = np.array(local_derivs).reshape(newshape)
             axis_derivs.append(local_derivs)
 
-        final_interp = self.interpolator(self.points[0], values, 
-                                    *self.interp_args, **self.interp_kwargs)
+        final_interp = self.interpolator(self.points[0], values,
+                                         *self.interp_args,
+                                         **self.interp_kwargs)
         y = final_interp(x[0])
 
         if nu < 1:
             return y
 
-        for i in range(len(self.points)-1):
-            deriv_interp = SeparableGridNDInterpolator(self.points[: -i - 1], 
-                                            axis_derivs[i],                          
-                                            interpolator = self.interpolator,
-                                            interp_args = self.interp_args,
-                                            interp_kwargs = self.interp_kwargs)
-            g = deriv_interp(x[: -i - 1], nu = nu - 1)
+        for i in range(len(self.points) - 1):
+            deriv_interp = self.__class__(self.points[: -i - 1],
+                                          axis_derivs[i],
+                                          interpolator=self.interpolator,
+                                          interp_args=self.interp_args,
+                                          interp_kwargs=self.interp_kwargs)
+            g = deriv_interp(x[: -i - 1], nu=nu - 1)
             gradient.insert(0, g)
 
         gradient.insert(0, final_interp(x[0], 1))
         gradient = np.array(gradient)
 
         return y, gradient
-

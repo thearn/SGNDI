@@ -2,3 +2,4 @@
 *__pycache
 *.DS_Store
 *.egg-info
+example.py

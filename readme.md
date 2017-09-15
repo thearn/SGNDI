@@ -172,7 +172,6 @@ plt.subplot(133)
 plt.imshow(A[::-1], extent=(U[0], U[-1], V[0], V[-1]))
 
 plt.show()
-quit()
 ```
 
 Which gives the plot shown at the top of this readme.
