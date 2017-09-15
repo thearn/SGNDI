@@ -19,7 +19,7 @@ This method can be considered a generalization of the class of multidimensional 
 
 If derivatives are provided by the chosen 1D interpolation method, then
 a gradient vector of the multidimensional interpolation may be computed
-and returned when the interpolation is performed. At the moment, only
+and and cached when the interpolation is performed. This can then be accessed by the `derivative` method. At the moment, only
 first-order derivatives are supported.
 
 Examples
