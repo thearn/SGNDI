@@ -1,3 +1,4 @@
+"""Installtion script."""
 from distutils.core import setup
 
 setup(name='sgndi',
@@ -6,4 +7,4 @@ setup(name='sgndi',
           'sgndi',
       ],
       install_requires=['scipy>=0.18']
-)
+      )
