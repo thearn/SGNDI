@@ -33,6 +33,7 @@ class SeparableGridNDInterpolator(object):
     Methods
     -------
     __call__
+    derivative
 
     See Also
     --------
@@ -106,10 +107,15 @@ class SeparableGridNDInterpolator(object):
         self.interpolator = interpolator
         self.interp_args = interp_args
         self.interp_kwargs = interp_kwargs
+        self._x = None
+        self._gradient = None
 
     def __call__(self, x, nu=1):
         """
-        Evaluate the spline and its first derivative at given positions.
+        Evaluate the interpolation at given positions. If mu=1, the gradient is
+        computed together with the interpolation, but is cached and returned
+        by the derivative method.
+
         Parameters
         ----------
         x : array_like
@@ -124,10 +130,6 @@ class SeparableGridNDInterpolator(object):
         -------
         y : float
             Interpolated value.
-
-        gradient : array_like
-            if nu = 1, the gradient vector of the interpolated values with r
-            respect to each parameter is computed and returned.
         """
 
         if nu > 0 and 'derivative' not in dir(self.interpolator):
@@ -139,6 +141,7 @@ class SeparableGridNDInterpolator(object):
             msg = "Only first derivatives (nu=1) are currently supported"
             raise ValueError(msg)
 
+        self._x = x
         gradient = []
         axis_derivs = []
         values = self.values.copy()
@@ -180,6 +183,33 @@ class SeparableGridNDInterpolator(object):
             gradient.insert(0, g)
 
         gradient.insert(0, final_interp(x[0], 1))
-        gradient = np.array(gradient)
+        self._gradient = np.array(gradient)
 
-        return y, gradient
+        return y
+
+    def derivative(self, pt):
+        """
+        Returns the computed gradients at the specified point.
+        The gradients are computed with the interpolation is performed, but
+        are cached and returned separately by this method.
+
+        If the point for evaluation differs from the point used to produce
+        the currently cached gradient, the interpolation is re-performed in
+        order to return the correct gradient.
+
+        Parameters
+        ----------
+        x : array_like
+            Input coordinates to evaluate each parameter at.
+
+        Returns
+        -------
+        gradient : array_like
+            if nu = 1, the gradient vector of the interpolated values with r
+            respect to each parameter is computed and returned.
+        """
+        if not (self._x is None) and np.array_equal(pt, self._x):
+            return self._gradient
+        else:
+            self(pt, nu=1)
+            return self._gradient

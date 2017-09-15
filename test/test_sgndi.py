@@ -18,13 +18,22 @@ class TestSGNDIoutput(object):
     tol = 1e-5
     m = 10
 
-    def check_output_and_gradient(self, x):
+    def check_output_and_cached_gradient(self, x):
         interp = SeparableGridNDInterpolator(self.points, self.values,
                                              interpolator=self.interpolator,
                                              interp_kwargs=self.interp_kwargs)
-        f, dfdx = interp(x)
+        f = interp(x)
+        dfdx = interp.derivative(x)
 
         assert_allclose(self.F(*x), f, rtol=self.tol)
+        assert_allclose(self.dF(*x), dfdx, rtol=self.tol)
+
+    def check_recomputed_gradient(self, x, y):
+        interp = SeparableGridNDInterpolator(self.points, self.values,
+                                             interpolator=self.interpolator,
+                                             interp_kwargs=self.interp_kwargs)
+        interp.derivative(y)
+        dfdx = interp.derivative(x)
         assert_allclose(self.dF(*x), dfdx, rtol=self.tol)
 
     def test_values(self):
@@ -39,7 +48,11 @@ class TestSGNDIoutput(object):
             samples[:, i] = np.random.uniform(pt[1], pt[-2], self.m)
 
         for x in samples:
-            yield self.check_output_and_gradient, x
+            yield self.check_output_and_cached_gradient, x
+
+        y = samples[0]
+        for x in samples[1:2]:
+            yield self.check_recomputed_gradient, x, y
 
 
 class TestSGNDIparabola(TestSGNDIoutput):

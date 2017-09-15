@@ -6,7 +6,7 @@ Separable Grid N-Dimensional Interpolator (SGDNI)
 ![alt text](example.png "Example interpolation")
 
 A multi-dimensional interpolating class with first-order gradients.
-This module provides a class `SeparableGridNDInterpolator` similair in 
+This module provides a class `SeparableGridNDInterpolator` similair in
 interface to the interpolators provided by [`scipy.interpolate`](https://docs.scipy.org/doc/scipy/reference/interpolate.html).
 
 This class provides interpolation on a regular grid in arbitrary dimensions, by applying
@@ -35,7 +35,11 @@ b = np.array([0, 1])
 c = np.array([[0, 1], [1, 0]])
 
 cs = SeparableGridNDInterpolator([a, b], c)
-value, gradient = cs([0.8,0.1])
+
+x = [0.8,0.1]
+
+value = cs(x)
+gradient = cs.derivative(x)
 
 print(value, gradient)
 ```
@@ -62,11 +66,11 @@ def F(u,v,z,w):
 
 U = np.linspace(0, 10, 10)
 V = np.linspace(0, 4, 6)
-Z = np.linspace(0, 10, 7) 
+Z = np.linspace(0, 10, 7)
 W = np.linspace(0, 1, 8)
 points = [U, V, Z, W]
 
-# Create coordinate mesh 
+# Create coordinate mesh
 
 u, v, z, w = np.meshgrid(*points, indexing='ij')
 
@@ -89,7 +93,9 @@ def dF(u,v,z,w):
 	# the actual gradient
 	return 2*(u-5), 2*(v-2), 2*(z-5), 2*(w-0.5)
 
-f, dfdx = interp(x)
+f = interp(x)
+dfdx = interp.derivative(x)
+
 print("actual value", F(*x))
 print("computed value", f)
 print("actual gradient:", dF(*x))
@@ -147,11 +153,11 @@ values = F(u, v)
 plt.subplot(132)
 plt.imshow(values[::-1], extent=(U[0], U[-1], V[0], V[-1]))
 
-interp = SeparableGridNDInterpolator(points, values, 
+interp = SeparableGridNDInterpolator(points, values,
 				interpolator = UnivariateSpline, interp_kwargs = {'k' : 5})
 
 #--------------------------------
-# Test that the created interpolator can actually approximate a fine level 
+# Test that the created interpolator can actually approximate a fine level
 # of detail, n = 50
 
 U = np.linspace(0, 3, 50)
@@ -163,7 +169,7 @@ u, v = np.meshgrid(*points, indexing='ij')
 
 vals = []
 for x in np.array([u.ravel(), v.ravel()]).T:
-    f = interp(x, 0)
+    f = interp(x)
     vals.append(f)
 
 A = np.array(vals).reshape(50, 50)
@@ -175,6 +181,61 @@ plt.show()
 ```
 
 Which gives the plot shown at the top of this readme.
+
+Example use in a numerical optimization
+------------------------------
+```python
+import numpy as np
+from scipy.optimize import fmin_bfgs
+from sgndi import SeparableGridNDInterpolator
+
+def F(u, v, z, w):
+    # min at u=5.234 v=2.128 z=5.531 w=0.574
+    return (u - 5.234)**2 + (v - 2.128)**2 + (z - 5.531)**2 + (w - 0.574)**2
+
+U = np.linspace(0, 10, 10)
+V = np.linspace(0, 10, 6)
+Z = np.linspace(0, 10, 7)
+W = np.linspace(0, 10, 8)
+
+points = [U, V, Z, W]
+
+u, v, z, w = np.meshgrid(*points, indexing='ij')
+
+values = F(u, v, z, w)
+
+interp = SeparableGridNDInterpolator(points, values)
+
+x = np.zeros(4)
+```
+
+Without gradients:
+```
+print(fmin_bfgs(interp, x))
+```
+
+```
+Optimization terminated successfully.
+         Current function value: 0.000000
+         Iterations: 3
+         Function evaluations: 24
+         Gradient evaluations: 4
+[ 5.23399953  2.12799974  5.53100043  0.57400106]
+```
+
+With gradients:
+```
+print(fmin_bfgs(interp, x, fprime=interp.derivative))
+```
+
+```
+Optimization terminated successfully.
+         Current function value: 0.000000
+         Iterations: 3
+         Function evaluations: 4
+         Gradient evaluations: 4
+[ 5.234  2.128  5.531  0.574]
+```
 
 Limitations
 ------------
