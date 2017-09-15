@@ -79,7 +79,8 @@ class SeparableGridNDInterpolator(object):
     Call the interpolation at the point above, which by default also
     computes the gradient of the interpolant at this point
 
-    >>> f, dfdx = interp(x)
+    >>> f = interp(x)
+    >>> dfdx = interp.derivative(x)
     >>> print("actual value", F(*x))
     >>> print("computed value", f)
     >>> print("actual gradient:", dF(*x))
@@ -95,11 +96,23 @@ class SeparableGridNDInterpolator(object):
     def __init__(self, points, values, interpolator=CubicSpline,
                  interp_args=(), interp_kwargs={}):
 
+        if not hasattr(values, 'ndim'):
+            # allow reasonable duck-typed values
+            values = np.asarray(values)
+
+        if len(points) > values.ndim:
+            raise ValueError("There are %d point arrays, but values has %d "
+                             "dimensions" % (len(points), values.ndim))
+
+        if hasattr(values, 'dtype') and hasattr(values, 'astype'):
+            if not np.issubdtype(values.dtype, np.inexact):
+                values = values.astype(float)
+
         dim_valid = [len(points[i]) == values.shape[i]
                      for i in range(len(points))]
         if not np.all(dim_valid):
-            msg = "Dimension mismatch between the points" +\
-                  " and the data values arrays"
+            msg = "The length of the point arrays does not match the" +\
+                  " shape of the values array."
             raise ValueError(msg)
 
         self.points = points
@@ -123,13 +136,13 @@ class SeparableGridNDInterpolator(object):
 
         nu : int
             Determines whether a gradient is computed or not.
-            if nu = 0, no gradient is computed or returned.
-            if nu = 1, the first order gradient is computed and returned.
+            if nu = 0, no gradient is computed.
+            if nu = 1, the first order gradient is computed and cached.
 
         Returns
         -------
         y : float
-            Interpolated value.
+            Interpolated output value.
         """
 
         if nu > 0 and 'derivative' not in dir(self.interpolator):
@@ -147,11 +160,13 @@ class SeparableGridNDInterpolator(object):
         values = self.values.copy()
 
         for i in reversed(range(1, len(self.points))):
-            values_reduced = np.zeros(values.size // values.shape[-1])
+            nv = values.size
+            nx = values.shape[-1]
+            values_reduced = np.zeros(nv // nx)
             newshape = values.shape[: -1]
             local_derivs = []
-            values = values.reshape(values.size // values.shape[-1],
-                                    values.shape[-1])
+            values = values.reshape(nv // nx,
+                                    nx)
             for k, row in enumerate(values):
                 local_interp = self.interpolator(self.points[i],
                                                  row,
