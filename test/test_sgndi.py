@@ -115,14 +115,22 @@ class TestLinearInterp(TestSGNDIoutput):
         self.values = self.F(x, y, z)
 
 
-class TestSGDNIExceptions(object):
+class TestSGDNIMiscBehavior(object):
 
     @raises(ValueError)
-    def test_dim_mismatch(self):
+    def test_dim_mismatch1(self):
         a = np.array([0, 1, 6])
         b = np.array([0, 1, 2])
-        c = np.array([[0, 1], [1, 0], [5, 4]])
-        cs = SeparableGridNDInterpolator([a, b], c)
+        c = [[0, 1], [1, 0], [5, 4]]
+        SeparableGridNDInterpolator([a, b], c)
+
+    @raises(ValueError)
+    def test_dim_mismatch2(self):
+        a = np.array([0, 1, 6])
+        b = np.array([0, 1, 2])
+        c = np.array([0, 1, 2])
+        d = np.array([[0, 1], [1, 0]])
+        SeparableGridNDInterpolator([a, b, c], d)
 
     @raises(ValueError)
     def test_max_deriv_order(self):

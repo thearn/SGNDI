@@ -1,4 +1,3 @@
-"""Separable Grid ND Interpolation module."""
 import numpy as np
 
 from scipy.interpolate import CubicSpline
